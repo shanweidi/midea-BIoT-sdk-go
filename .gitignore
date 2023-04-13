@@ -1,0 +1,17 @@
+# idea ignore
+.idea/
+out/
+*.ipr
+*.iml
+*.iws
+
+### macOS template
+.DS_Store
+.AppleDouble
+.LSOverride
+
+.vscode/
+
+# temp ignore
+*.log
+*.exe
