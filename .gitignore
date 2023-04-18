@@ -11,6 +11,7 @@ out/
 .LSOverride
 
 .vscode/
+/vendor/
 
 # temp ignore
 *.log

@@ -7,6 +7,10 @@
 ## 安装
 使用 `go get` 下载安装 SDK
 
+```sh
+$ go get -u github.com/shanweidi/midea-BIoT-sdk-go/sdk
+```
+
 欢迎使用
 
 copyright@美的集团楼宇科技研究院
@@ -16,6 +20,5 @@ copyright@美的集团楼宇科技研究院
 | 目录 | 描述 |
 | -------- | -------------- |
 | sdk  | sdk包   |
-| services   | 设备管理 |
-| mqtt| 接入协议        |
+| services   | 业务服务 |
 | tools    | 通用工具   |
