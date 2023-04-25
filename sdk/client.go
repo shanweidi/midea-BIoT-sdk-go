@@ -35,12 +35,28 @@ func (client *Client) InitClientConfig() (config *Config) {
 	}
 }
 
-func (client *Client) InitClient() tools.Error {
+func (client *Client) InitClient() error {
 	client.rw.Lock()
 	defer client.rw.Unlock()
 
 	config := client.InitClientConfig()
 	client.config = config
+	client.LC = tools.NewLoggerClient("SDK-BIoT", config.LogLevel)
+	if config.EnableAsync {
+		client.EnableAsync(config.GoRoutinePoolSize, config.MaxTaskQueueSize)
+	}
+	return client.newMqttClient()
+}
+
+func (client *Client) InitClientWithConfig(config *Config) error {
+	client.rw.Lock()
+	defer client.rw.Unlock()
+
+	client.config = config
+	client.LC = tools.NewLoggerClient("SDK-BIoT", config.LogLevel)
+	if config.EnableAsync {
+		client.EnableAsync(config.GoRoutinePoolSize, config.MaxTaskQueueSize)
+	}
 	return client.newMqttClient()
 }
 
@@ -72,6 +88,24 @@ func (client *Client) EnableAsync(routinePoolSize, maxTaskQueueSize int) {
 			}
 		}()
 	}
+}
+
+func (client *Client) AddAsyncTask(task func()) (err tools.Error) {
+	if client.asyncTaskQueue != nil {
+		if client.isOpenAsync {
+			client.asyncTaskQueue <- task
+		}
+	} else {
+		err = tools.NewSdkError(tools.AsyncFunctionNotEnabledCode, tools.AsyncFunctionNotEnabledMessage, nil)
+	}
+	return
+}
+
+func (client *Client) CouldAsync() bool {
+	client.rw.RLock()
+	defer client.rw.RUnlock()
+
+	return client.isOpenAsync
 }
 
 // registerResponseHandler 注册相应处理函数
@@ -154,8 +188,53 @@ func (client *Client) newMqttClient() tools.Error {
 	return nil
 }
 
+func (client *Client) Subscribe(topicPrefix string, callback func(payload entities.CloudMqttBasicPayload)) {
+	topic := tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn)
+	if token := client.client.Subscribe(topic, client.config.Qos,
+		func(c mqtt.Client, message mqtt.Message) {
+			mqttPayload := entities.CloudMqttBasicPayload{}
+			err := json.Unmarshal(message.Payload(), &mqttPayload)
+			if err != nil {
+				client.LC.Errorf("decode mqtt payload: %s error, msg: %s", message.Payload(), err)
+				return
+			}
+			//payload base64解码
+			bytes, err := base64.StdEncoding.DecodeString(mqttPayload.Payload)
+			if err != nil {
+				client.LC.Errorf("invalid payload:%s", mqttPayload.Payload)
+				return
+			}
+			mqttPayload.Payload = string(bytes)
+			client.LC.Infof("topic:%s receive  payload: %s", topic, tools.ToJson(mqttPayload))
+
+			if client.isOpenAsync {
+				client.AddAsyncTask(func() {
+					callback(mqttPayload)
+				})
+			} else {
+				callback(mqttPayload)
+			}
+		}); token.Wait() && token.Error() != nil {
+		client.client.Disconnect(0)
+		client.LC.Errorf("could not subscribe to topic '%s' for MQTT trigger: %s",
+			topic, token.Error().Error())
+	}
+}
+
 func (client *Client) PublishToEmqx(topicPrefix, op string, seqNo int, data interface{}) {
 	client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn, strconv.Itoa(seqNo)), op, seqNo, data)
+}
+
+func (client *Client) PublishToEmqxAsync(topicPrefix, op string, seqNo int, data interface{}) <-chan error {
+	errChan := make(chan error, 1)
+	err := client.AddAsyncTask(func() {
+		client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn, strconv.Itoa(seqNo)), op, seqNo, data)
+	})
+	if err != nil {
+		errChan <- err
+		close(errChan)
+	}
+	return errChan
 }
 
 func (client *Client) sendToBroker(topic string, op string, seqNo int, data interface{}) {

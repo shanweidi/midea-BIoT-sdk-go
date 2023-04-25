@@ -16,8 +16,11 @@ const (
 	RegisterKeyAuthErrorCode    = "SDK.KeyAuthFail"
 	RegisterKeyAuthErrorMessage = "RegisterKey is not correct, please check register payload"
 
-	ContractInvalidErrorCode    = "ContractInvalid"
+	ContractInvalidErrorCode    = "SDK.ContractInvalid"
 	ContractInvalidErrorMessage = "ContractInvalid, please check your param"
+
+	AsyncFunctionNotEnabledCode    = "SDK.AsyncFunctionNotEnabled"
+	AsyncFunctionNotEnabledMessage = "Async function is not enabled in client, please invoke 'client.EnableAsync' function"
 )
 
 type Error interface {

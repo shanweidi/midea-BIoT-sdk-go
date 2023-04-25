@@ -6,7 +6,8 @@
 package tools
 
 import (
-	"path/filepath"
+	"encoding/json"
+	"path"
 	"reflect"
 	"strconv"
 	"time"
@@ -47,5 +48,10 @@ func GetTimeInFormatISO8601() (timeStr string) {
 }
 
 func JoinMqttTopic(elem ...string) string {
-	return filepath.Join(elem...)
+	return path.Join(elem...)
+}
+
+func ToJson(param interface{}) string {
+	b, _ := json.Marshal(param)
+	return string(b)
 }

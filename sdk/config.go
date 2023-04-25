@@ -23,10 +23,11 @@ type Config struct {
 	MaxTaskQueueSize  int    `default:"1000"`
 	EnableAsync       bool   `default:"false"`
 	Qos               byte   `default:"0"`
-	Username          string `default:"hbtiot"`
-	Password          string `default:"Z?ZKph&GPdX!p2-m"`
+	Username          string `default:""`
+	Password          string `default:""`
+	LogLevel          string `default:"INFO"`
 	Timeout           time.Duration
-	KeepAlive         time.Duration
+	KeepAlive         time.Duration `default:"60"`
 }
 
 func NewConfig() (config *Config) {
@@ -50,7 +51,7 @@ func (c *Config) WithGoRoutinePoolSize(goRoutinePoolSize int) *Config {
 	return c
 }
 
-func (c *Config) WithScheme(protocol string) *Config {
+func (c *Config) WithProtocol(protocol string) *Config {
 	c.Protocol = protocol
 	return c
 }
@@ -62,6 +63,11 @@ func (c *Config) WithTimeout(timeout time.Duration) *Config {
 
 func (c *Config) WithKeepAlive(keepalive time.Duration) *Config {
 	c.KeepAlive = keepalive
+	return c
+}
+
+func (c *Config) WithLogLevel(level string) *Config {
+	c.LogLevel = level
 	return c
 }
 

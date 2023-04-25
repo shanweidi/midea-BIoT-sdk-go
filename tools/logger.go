@@ -59,7 +59,7 @@ type mLogger struct {
 }
 
 // NewClient creates an instance of LoggingClient
-func NewClient(owningServiceName string, logLevel string) LoggingClient {
+func NewLoggerClient(owningServiceName string, logLevel string) LoggingClient {
 	if !isValidLogLevel(logLevel) {
 		logLevel = InfoLog
 	}

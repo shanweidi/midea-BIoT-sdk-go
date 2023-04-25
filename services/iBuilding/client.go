@@ -10,3 +10,15 @@ import "github.com/shanweidi/midea-BIoT-sdk-go/sdk"
 type Client struct {
 	sdk.Client
 }
+
+func NewClient() (client *Client, err error) {
+	client = &Client{}
+	err = client.InitClient()
+	return
+}
+
+func NewClientWithOptions(config *sdk.Config) (client *Client, err error) {
+	client = &Client{}
+	err = client.InitClientWithConfig(config)
+	return
+}
