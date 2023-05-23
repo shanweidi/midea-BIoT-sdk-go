@@ -31,7 +31,7 @@ func InitStructWithDefaultTag(bean interface{}) {
 			setter.SetUint(intValue)
 		case "time.Duration":
 			intValue, _ := strconv.ParseInt(defaultValue, 10, 64)
-			setter.SetInt(intValue)
+			setter.SetInt(intValue * 1000 * 1000 * 1000)
 		case "string":
 			setter.SetString(defaultValue)
 		case "bool":

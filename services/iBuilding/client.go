@@ -12,9 +12,7 @@ type Client struct {
 }
 
 func NewClient() (client *Client, err error) {
-	client = &Client{}
-	err = client.InitClient()
-	return
+	panic("not support yet")
 }
 
 func NewClientWithOptions(config *sdk.Config) (client *Client, err error) {

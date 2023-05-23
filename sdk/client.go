@@ -60,6 +60,7 @@ func (client *Client) InitClientWithConfig(config *Config) error {
 	return client.newMqttClient()
 }
 
+//Shutdown used for close async feature
 func (client *Client) Shutdown() {
 	if client.asyncTaskQueue != nil {
 		close(client.asyncTaskQueue)
@@ -137,8 +138,6 @@ func (client *Client) registerResponseHandler() mqtt.MessageHandler {
 
 		//设备注册成功
 		client.LC.Infof("----------register to cloud success----------")
-		//todo 上报设备模型
-		//go mqtt.onAuthPassedHandler(mqtt)
 	}
 }
 
@@ -150,7 +149,7 @@ func (client *Client) subscribeRegisterResponse(c mqtt.Client, topic string) {
 	}
 }
 
-//建立起TCP连接后，网关先发送注册报文至云端，注册成功后再执行后续逻辑
+//建立起连接后，网关先发送注册报文至云端，注册成功后再执行后续逻辑
 func (client *Client) defaultOnConnectHandler() mqtt.OnConnectHandler {
 	return func(c mqtt.Client) {
 		client.subscribeRegisterResponse(c, tools.JoinMqttTopic(SUBSCRIBE_TOPIC_DEV_REG_RES, client.config.GwType, client.config.GwSn))
@@ -160,14 +159,13 @@ func (client *Client) defaultOnConnectHandler() mqtt.OnConnectHandler {
 			Key:        client.config.Key,
 			ReqTime:    strconv.Itoa(int(time.Now().UnixNano() / 1e6)),
 			GwVer:      "0.0.1",
-			ProductKey: "edgex",
+			ProductKey: client.config.ProductKey,
 			DevType:    "",
 			DevSn:      client.config.GwSn,
 			DevVer:     "devVer",
 			MfrName:    "Midea",
-			MfrModel:   "edgex",
+			MfrModel:   "sdk-go",
 		}
-		//todo 这个seqNo待解决
 		client.PublishToEmqx(PUBLISH_TOPIC_DEV_REG, "DEV_REG", 0, devRegPayload)
 	}
 }
