@@ -27,31 +27,17 @@ type Client struct {
 	asyncTaskQueue chan func()
 }
 
-func (client *Client) InitClientConfig() (config *Config) {
-	if client.config != nil {
-		return client.config
-	} else {
-		return NewConfig()
-	}
-}
-
-func (client *Client) InitClient() error {
-	client.rw.Lock()
-	defer client.rw.Unlock()
-
-	config := client.InitClientConfig()
-	client.config = config
-	client.LC = tools.NewLoggerClient("SDK-BIoT", config.LogLevel)
-	if config.EnableAsync {
-		client.EnableAsync(config.GoRoutinePoolSize, config.MaxTaskQueueSize)
-	}
-	return client.newMqttClient()
+func (client *Client) InitClient() {
+	panic("not support yet")
 }
 
 func (client *Client) InitClientWithConfig(config *Config) error {
 	client.rw.Lock()
 	defer client.rw.Unlock()
 
+	if err := config.verify(); err != nil {
+		return err
+	}
 	client.config = config
 	client.LC = tools.NewLoggerClient("SDK-BIoT", config.LogLevel)
 	if config.EnableAsync {

@@ -3,7 +3,7 @@
  -- @date: 2023-04-18 2:32 下午
  -- @Desc:
 */
-package iBuilding
+package services
 
 import "github.com/shanweidi/midea-BIoT-sdk-go/sdk"
 
@@ -12,7 +12,9 @@ type Client struct {
 }
 
 func NewClient() (client *Client, err error) {
-	panic("not support yet")
+	client = &Client{}
+	client.InitClient()
+	return
 }
 
 func NewClientWithOptions(config *sdk.Config) (client *Client, err error) {

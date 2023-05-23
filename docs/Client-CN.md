@@ -7,13 +7,15 @@
 
 
 ```go
+package main
+
 import (
         "github.com/shanweidi/midea-BIoT-sdk-go/sdk"
-	"github.com/shanweidi/midea-BIoT-sdk-go/services/iBuilding"
+	"github.com/shanweidi/midea-BIoT-sdk-go/services"
 )
 
-config := NewConfig().WithClientId("sdk_test").WithServerUri("mqtt://127.0.0.1:1883")
-client, err := NewClientWithOptions(config)
+config := sdk.NewConfig().WithClientId("sdk_test").WithServerUri("mqtt://127.0.0.1:1883")
+client, err := services.NewClientWithOptions(config)
 ```
 
 ## 客户端配置

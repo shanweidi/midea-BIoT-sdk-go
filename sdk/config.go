@@ -36,6 +36,25 @@ func NewConfig() (config *Config) {
 	return
 }
 
+func (c *Config) verify() tools.Error {
+	if len(c.ServerUri) == 0 {
+		return tools.NewSdkError(tools.ConfigServerUrlErrorCode, tools.ConfigServerUrlErrorMessage, nil)
+	}
+	if len(c.ClientId) == 0 {
+		return tools.NewSdkError(tools.ConfigClientIdErrorCode, tools.ConfigClientIdErrorMessage, nil)
+	}
+	if len(c.GwSn) == 0 {
+		return tools.NewSdkError(tools.ConfigGatewaySnErrorCode, tools.ConfigGatewaySnErrorMessage, nil)
+	}
+	if len(c.GwType) == 0 {
+		return tools.NewSdkError(tools.ConfigGatewayTypeErrorCode, tools.ConfigGatewayTypeErrorMessage, nil)
+	}
+	if len(c.Key) == 0 {
+		return tools.NewSdkError(tools.ConfigKeyErrorCode, tools.ConfigKeyErrorMessage, nil)
+	}
+	return nil
+}
+
 func (c *Config) WithEnableAsync(isEnableAsync bool) *Config {
 	c.EnableAsync = isEnableAsync
 	return c

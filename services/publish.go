@@ -3,7 +3,7 @@
  -- @date: 2023-04-19 4:48 下午
  -- @Desc:
 */
-package iBuilding
+package services
 
 import (
 	"github.com/shanweidi/midea-BIoT-sdk-go/sdk"

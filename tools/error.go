@@ -21,6 +21,21 @@ const (
 
 	AsyncFunctionNotEnabledCode    = "SDK.AsyncFunctionNotEnabled"
 	AsyncFunctionNotEnabledMessage = "Async function is not enabled in client, please invoke 'client.EnableAsync' function"
+
+	ConfigServerUrlErrorCode    = "SDK.ServerUriEmpty"
+	ConfigServerUrlErrorMessage = "Your Emqx Server Uri is empty, please check your config"
+
+	ConfigClientIdErrorCode    = "SDK.ClientIdEmpty"
+	ConfigClientIdErrorMessage = "Your Client ID is empty, please check your config"
+
+	ConfigGatewaySnErrorCode    = "SDK.GatewaySnEmpty"
+	ConfigGatewaySnErrorMessage = "Your Gateway SN is empty, please check your config"
+
+	ConfigGatewayTypeErrorCode    = "SDK.GatewayTypeEmpty"
+	ConfigGatewayTypeErrorMessage = "Your Gateway Type is empty, please check your config"
+
+	ConfigKeyErrorCode    = "SDK.SecretKeyEmpty"
+	ConfigKeyErrorMessage = "Your Secret Key is empty, please contact midea BIoT acquire!"
 )
 
 type Error interface {

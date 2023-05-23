@@ -7,21 +7,11 @@ package sdk
 
 import (
 	"fmt"
-	"github.com/shanweidi/midea-BIoT-sdk-go/sdk/entities"
 	"testing"
 
-	"github.com/shanweidi/midea-BIoT-sdk-go/tools"
+	"github.com/shanweidi/midea-BIoT-sdk-go/sdk/entities"
 	"github.com/stretchr/testify/assert"
 )
-
-func Test_InitClient(t *testing.T) {
-	client := &Client{}
-	err := client.InitClient()
-
-	assert.NotNil(t, err)
-	assert.IsType(t, &tools.SdkError{}, err)
-	fmt.Println("SdkError:" + err.Error())
-}
 
 func Test_InitClientWithConfig(t *testing.T) {
 	config := NewConfig().WithClientId("shan_test").WithServerUri("mqtt://127.0.0.1:1883")
