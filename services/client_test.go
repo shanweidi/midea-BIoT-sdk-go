@@ -30,4 +30,5 @@ func Test_ClientWithConfig(t *testing.T) {
 
 	_, err = NewClientWithOptions(config)
 	assert.Nil(t, err)
+	select {}
 }

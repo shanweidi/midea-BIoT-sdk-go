@@ -117,9 +117,9 @@ func (client *Client) registerResponseHandler() mqtt.MessageHandler {
 			return
 		}
 		// 校验注册结果
-		if r.Result != 0 {
+		if r.ErrCode != 0 {
 			client.LC.Errorf("register response handler error. code: %s message: %s ", r.ErrCode, r.ErrMsg)
-			return
+			panic(r.ErrMsg + ",please check your Key on config")
 		}
 
 		//设备注册成功
@@ -205,11 +205,29 @@ func (client *Client) Subscribe(topicPrefix string, callback func(payload entiti
 	}
 }
 
+//PublishToEmqx 用于主动上报云端的场景
 func (client *Client) PublishToEmqx(topicPrefix, op string, seqNo int, data interface{}) {
-	client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn, strconv.Itoa(seqNo)), op, seqNo, data)
+	client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn), op, seqNo, data)
 }
 
 func (client *Client) PublishToEmqxAsync(topicPrefix, op string, seqNo int, data interface{}) <-chan error {
+	errChan := make(chan error, 1)
+	err := client.AddAsyncTask(func() {
+		client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn), op, seqNo, data)
+	})
+	if err != nil {
+		errChan <- err
+		close(errChan)
+	}
+	return errChan
+}
+
+//ResponseToEmqx 用于回复云端的场景
+func (client *Client) ResponseToEmqx(topicPrefix, op string, seqNo int, data interface{}) {
+	client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn, strconv.Itoa(seqNo)), op, seqNo, data)
+}
+
+func (client *Client) ResponseToEmqxAsync(topicPrefix, op string, seqNo int, data interface{}) <-chan error {
 	errChan := make(chan error, 1)
 	err := client.AddAsyncTask(func() {
 		client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn, strconv.Itoa(seqNo)), op, seqNo, data)

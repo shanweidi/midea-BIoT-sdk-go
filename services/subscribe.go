@@ -11,11 +11,13 @@ import (
 )
 
 //SubscribeGetRequest 订阅来自云端的get请求
+//SDK用户自定义实现 callback
 func (client *Client) SubscribeGetRequest(callback func(payload entities.CloudMqttBasicPayload)) {
 	client.Subscribe(sdk.SUBSCRIBE_TOPIC_DEV_GET, callback)
 }
 
 //SubscribeSetRequest 订阅来自云端的set请求
+//SDK用户自定义实现 callback
 func (client *Client) SubscribeSetRequest(callback func(payload entities.CloudMqttBasicPayload)) {
 	client.Subscribe(sdk.SUBSCRIBE_TOPIC_DEV_SET, callback)
 }
