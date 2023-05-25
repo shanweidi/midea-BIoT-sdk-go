@@ -10,7 +10,7 @@ import (
 )
 
 //ResponseGetRequest 用于回复 SubscribeGetRequest
-//seqNo 参数应等同于本次云端南向 get 请求中所携带的seqNo
+//seqNo 参数应等同于本次云端南向 Get 请求中所携带的seqNo
 func (client *Client) ResponseGetRequest(op string, seqNo int, data interface{}) {
 	if client.CouldAsync() {
 		client.ResponseToEmqxAsync(sdk.PUBLISH_TOPIC_DEV_GET_DATA_RES, op, seqNo, data)
@@ -20,7 +20,7 @@ func (client *Client) ResponseGetRequest(op string, seqNo int, data interface{})
 }
 
 //ResponseSetRequest 用于回复 SubscribeSetRequest
-//seqNo 参数应等同于本次云端南向 set 命令中所携带的seqNo
+//seqNo 参数应等同于本次云端南向 Set 命令中所携带的seqNo
 func (client *Client) ResponseSetRequest(op string, seqNo int, data interface{}) {
 	if client.CouldAsync() {
 		client.ResponseToEmqxAsync(sdk.PUBLISH_TOPIC_DEV_SET_DATA_RES, op, seqNo, data)

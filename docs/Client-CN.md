@@ -33,8 +33,8 @@ client, err := services.NewClientWithOptions(config)
 | MaxTaskQueueSize    | 可缓存的最大任务数  | 1000 |
 | EnableAsync    | 是否开启异步  | 不开启 |
 | Qos    | Qos等级  | 0 |
-| Username    | 用户名  | 无默认 |
-| Password    | 密码  | 无默认 |
+| Username    | 用户名  | 默认为空 |
+| Password    | 密码  | 默认为空 |
 | LogLevel    | 日志级别  | INFO |
 | KeepAlive    | 心跳间隔  | 60秒 |
 | Timeout    | 超时时间  | 无默认 |
