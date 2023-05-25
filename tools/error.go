@@ -36,6 +36,9 @@ const (
 
 	ConfigKeyErrorCode    = "SDK.SecretKeyEmpty"
 	ConfigKeyErrorMessage = "Your Secret Key is empty, please contact midea BIoT acquire!"
+
+	ConfigProtocolErrorCode    = "SDK.ProtocolNotSupport"
+	ConfigProtocolErrorMessage = "The Protocol  is not supported yet!Sorry, please focus on our upgrade"
 )
 
 type Error interface {

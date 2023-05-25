@@ -119,7 +119,7 @@ func (client *Client) registerResponseHandler() mqtt.MessageHandler {
 		// 校验注册结果
 		if r.ErrCode != 0 {
 			client.LC.Errorf("register response handler error. code: %s message: %s ", r.ErrCode, r.ErrMsg)
-			panic(r.ErrMsg + ",please check your Key on config")
+			panic(r.ErrMsg + ",please check your Key on Config")
 		}
 
 		//设备注册成功
