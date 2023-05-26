@@ -19,9 +19,9 @@ func (client *Client) ResponseGetRequest(op string, seqNo int, data interface{})
 	}
 }
 
-//ResponseSetRequest 用于回复 SubscribeSetRequest
+//ResponseSetCommand 用于回复 SubscribeSetCommand
 //seqNo 参数应等同于本次云端南向 Set 命令中所携带的seqNo
-func (client *Client) ResponseSetRequest(op string, seqNo int, data interface{}) {
+func (client *Client) ResponseSetCommand(op string, seqNo int, data interface{}) {
 	if client.CouldAsync() {
 		client.ResponseToEmqxAsync(sdk.PUBLISH_TOPIC_DEV_SET_DATA_RES, op, seqNo, data)
 	} else {
@@ -36,5 +36,15 @@ func (client *Client) ReportRuntimeData(op string, seqNo int, data interface{}) 
 		client.PublishToEmqxAsync(sdk.PUBLISH_TOPIC_DEV_REPORT, op, seqNo, data)
 	} else {
 		client.PublishToEmqx(sdk.PUBLISH_TOPIC_DEV_REPORT, op, seqNo, data)
+	}
+}
+
+//ReportRequestData 用于主动通知云端，eg. 同步云端UTC时间，ACK等场景
+//该 seqNo 由SDK用户自己维护，建议为随上报包数递增
+func (client *Client) ReportRequestData(op string, seqNo int, data interface{}) {
+	if client.CouldAsync() {
+		client.PublishToEmqxAsync(sdk.PUBLISH_TOPIC_DEV_REQUEST, op, seqNo, data)
+	} else {
+		client.PublishToEmqx(sdk.PUBLISH_TOPIC_DEV_REQUEST, op, seqNo, data)
 	}
 }
