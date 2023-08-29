@@ -157,12 +157,23 @@ func (client *Client) defaultOnConnectHandler() mqtt.OnConnectHandler {
 }
 
 func (client *Client) newMqttClient() tools.Error {
-	opts := mqtt.NewClientOptions().AddBroker(client.config.ServerUri).SetClientID(client.config.ClientId)
+	broker := tools.ParseServerUri(client.config.ServerUri)
+	switch client.config.Protocol {
+	case MQTT:
+		broker = fmt.Sprintf("tcp://%s", broker)
+	case MQTTS:
+		broker = fmt.Sprintf("ssl://%s", broker)
+	}
+	opts := mqtt.NewClientOptions().AddBroker(broker).SetClientID(client.config.ClientId)
 	opts.SetKeepAlive(client.config.KeepAlive)
 	opts.SetPassword(client.config.Password)
 	opts.SetUsername(client.config.Username)
 	opts.SetAutoReconnect(true)
 	opts.SetOnConnectHandler(client.defaultOnConnectHandler())
+
+	if client.config.Protocol == MQTTS {
+		opts.SetTLSConfig(tools.NewTlsConfig(client.config.CaPemPath))
+	}
 
 	c := mqtt.NewClient(opts)
 	if token := c.Connect(); token.Wait() && token.Error() != nil {

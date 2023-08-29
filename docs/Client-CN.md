@@ -29,6 +29,7 @@ client, err := services.NewClientWithOptions(config)
 | ServerUri    | emqx地址   | 无默认，必需指定 |
 | ClientId    | 客户端ID   | 无默认，必需指定 |
 | Protocol    | 协议   | MQTT |
+| CaPemPath    | 根证书路径(需指定至文件名，仅MQTTS所需)   | ca.pem |
 | GoRoutinePoolSize    | 最大并发数   | 5 |
 | MaxTaskQueueSize    | 可缓存的最大任务数  | 1000 |
 | EnableAsync    | 是否开启异步  | 不开启 |

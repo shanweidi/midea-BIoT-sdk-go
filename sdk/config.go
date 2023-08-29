@@ -12,20 +12,21 @@ import (
 )
 
 type Config struct {
-	GwType            string `default:""`
-	GwSn              string `default:""`
-	Key               string `default:""`
-	ProductKey        string `default:""`
-	ServerUri         string `default:""`
-	ClientId          string `default:""`
-	Protocol          string `default:"MQTT"`
-	GoRoutinePoolSize int    `default:"5"`
-	MaxTaskQueueSize  int    `default:"1000"`
-	EnableAsync       bool   `default:"false"`
-	Qos               byte   `default:"0"`
-	Username          string `default:""`
-	Password          string `default:""`
-	LogLevel          string `default:"INFO"`
+	GwType            string   `default:""`
+	GwSn              string   `default:""`
+	Key               string   `default:""`
+	ProductKey        string   `default:""`
+	ServerUri         string   `default:""`
+	ClientId          string   `default:""`
+	Protocol          Protocol `default:"MQTT"`
+	CaPemPath         string   `default:"ca.pem"`
+	GoRoutinePoolSize int      `default:"5"`
+	MaxTaskQueueSize  int      `default:"1000"`
+	EnableAsync       bool     `default:"false"`
+	Qos               byte     `default:"0"`
+	Username          string   `default:""`
+	Password          string   `default:""`
+	LogLevel          string   `default:"INFO"`
 	Timeout           time.Duration
 	KeepAlive         time.Duration `default:"60"`
 }
@@ -75,6 +76,11 @@ func (c *Config) WithGoRoutinePoolSize(goRoutinePoolSize int) *Config {
 
 func (c *Config) WithProtocol(protocol string) *Config {
 	c.Protocol = protocol
+	return c
+}
+
+func (c *Config) WithCaPemPath(pemPath string) *Config {
+	c.CaPemPath = pemPath
 	return c
 }
 

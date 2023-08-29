@@ -6,10 +6,15 @@
 package tools
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+	"io/ioutil"
+	"log"
 	"path"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -54,4 +59,24 @@ func JoinMqttTopic(elem ...string) string {
 func ToJson(param interface{}) string {
 	b, _ := json.Marshal(param)
 	return string(b)
+}
+
+func ParseServerUri(uri string) string {
+	if !strings.Contains(uri, "://") {
+		return uri
+	} else {
+		return strings.Split(uri, "://")[1]
+	}
+}
+
+func NewTlsConfig(filename string) *tls.Config {
+	certpool := x509.NewCertPool()
+	ca, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	certpool.AppendCertsFromPEM(ca)
+	return &tls.Config{
+		RootCAs: certpool,
+	}
 }

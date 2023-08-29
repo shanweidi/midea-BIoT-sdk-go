@@ -22,7 +22,7 @@ func (client *Client) SubscribeSetCommand(callback func(payload entities.CloudMq
 	client.Subscribe(sdk.SUBSCRIBE_TOPIC_DEV_SET, callback)
 }
 
-//SubscribeCloudResponse 用于订阅 ReportRequestData 后，来自云端的响应
+//SubscribeCloudResponse 用于 ReportRequestData 后，订阅来自云端的响应
 //payload中的 seqNo 与 SDK用户在 ReportRequestData 中上报时的包序号保持一致
 //SDK用户自定义实现 callback
 func (client *Client) SubscribeCloudResponse(callback func(payload entities.CloudMqttBasicPayload)) {

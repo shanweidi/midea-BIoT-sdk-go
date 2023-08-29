@@ -5,7 +5,12 @@
 */
 package sdk
 
+type Protocol = string
+
 const (
+	MQTT  Protocol = "MQTT"
+	MQTTS Protocol = "MQTTS"
+
 	//设备注册
 	PUBLISH_TOPIC_DEV_REG       = "hbt/iot/mbms/register"
 	SUBSCRIBE_TOPIC_DEV_REG_RES = "hbt/iot/mbms/register/response"
