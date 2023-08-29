@@ -53,7 +53,7 @@ func (c *Config) verify() tools.Error {
 	if len(c.Key) == 0 {
 		return tools.NewSdkError(tools.ConfigKeyErrorCode, tools.ConfigKeyErrorMessage, nil)
 	}
-	if c.Protocol != "MQTT" {
+	if c.Protocol != MQTT && c.Protocol != MQTTS {
 		return tools.NewSdkError(tools.ConfigProtocolErrorCode, tools.ConfigProtocolErrorMessage, nil)
 	}
 	return nil
