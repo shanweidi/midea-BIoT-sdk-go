@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -24,6 +25,7 @@ type Client struct {
 	client         mqtt.Client
 	LC             tools.LoggingClient
 	isOpenAsync    bool
+	isActive       atomic.Value
 	asyncTaskQueue chan func()
 }
 
@@ -32,18 +34,30 @@ func (client *Client) InitClient() {
 }
 
 func (client *Client) InitClientWithConfig(config *Config) error {
-	client.rw.Lock()
-	defer client.rw.Unlock()
-
 	if err := config.verify(); err != nil {
 		return err
 	}
 	client.config = config
+	client.isActive.Store(true)
 	client.LC = tools.NewLoggerClient("SDK-BIoT", config.LogLevel)
 	if config.EnableAsync {
 		client.EnableAsync(config.GoRoutinePoolSize, config.MaxTaskQueueSize)
 	}
 	return client.newMqttClient()
+}
+
+func (client *Client) Close() {
+	client.rw.Lock()
+	defer client.rw.Unlock()
+
+	if client.client != nil && client.client.IsConnected() {
+		client.client.Disconnect(0)
+	}
+
+	client.config = nil
+	client.LC = nil
+	client.isActive.Store(false)
+	client.isOpenAsync = false
 }
 
 //Shutdown used for close async feature
@@ -93,6 +107,17 @@ func (client *Client) CouldAsync() bool {
 	defer client.rw.RUnlock()
 
 	return client.isOpenAsync
+}
+
+//IsConnected used for read the mqtt connection status
+func (client *Client) IsConnected() bool {
+	client.rw.RLock()
+	defer client.rw.RUnlock()
+
+	if client.client == nil {
+		return false
+	}
+	return client.client.IsConnected()
 }
 
 // registerResponseHandler 注册相应处理函数
@@ -157,6 +182,12 @@ func (client *Client) defaultOnConnectHandler() mqtt.OnConnectHandler {
 }
 
 func (client *Client) newMqttClient() tools.Error {
+	client.rw.Lock()
+	defer client.rw.Unlock()
+
+	if client.client != nil && client.client.IsConnected() {
+		return nil
+	}
 	broker := tools.ParseServerUri(client.config.ServerUri)
 	switch client.config.Protocol {
 	case MQTT:
@@ -210,7 +241,6 @@ func (client *Client) Subscribe(topicPrefix string, callback func(payload entiti
 				callback(mqttPayload)
 			}
 		}); token.Wait() && token.Error() != nil {
-		client.client.Disconnect(0)
 		client.LC.Errorf("could not subscribe to topic '%s' for MQTT trigger: %s",
 			topic, token.Error().Error())
 	}
@@ -260,10 +290,8 @@ func (client *Client) sendToBroker(topic string, op string, seqNo int, data inte
 	if token.Error() != nil {
 		client.LC.Errorf("publish topic:%s message error:%v, payload:%s", topic, token.Error(), string(p))
 		// 判断错误，是否重新初始化 MQTT clients
-		if token.Error() == mqtt.ErrNotConnected {
-			var err tools.Error
-			err = client.newMqttClient()
-			if err != nil {
+		if token.Error() == mqtt.ErrNotConnected && client.isActive.Load().(bool) {
+			if err := client.newMqttClient(); err != nil {
 				client.LC.Errorf("new mqtt client error: %s", err)
 			}
 		}
