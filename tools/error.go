@@ -13,6 +13,9 @@ const (
 	ConnectEmqxErrorCode    = "SDK.ConnectEmqxFail"
 	ConnectEmqxErrorMessage = "Connect Emqx Broker failed, please check your connect options"
 
+	PubEmqxErrorCode    = "SDK.PublishFail"
+	PubEmqxErrorMessage = "Pub To Emqx Broker comes up error"
+
 	RegisterKeyAuthErrorCode    = "SDK.KeyAuthFail"
 	RegisterKeyAuthErrorMessage = "RegisterKey is not correct, please check register payload"
 

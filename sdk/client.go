@@ -247,8 +247,9 @@ func (client *Client) Subscribe(topicPrefix string, callback func(payload entiti
 }
 
 //PublishToEmqx 用于主动上报云端的场景
-func (client *Client) PublishToEmqx(topicPrefix, op string, seqNo int, data interface{}) {
-	client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn), op, seqNo, data)
+func (client *Client) PublishToEmqx(topicPrefix, op string, seqNo int, data interface{}) tools.Error {
+	err := client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn), op, seqNo, data)
+	return tools.NewSdkError(tools.PubEmqxErrorCode, tools.PubEmqxErrorMessage, err)
 }
 
 func (client *Client) PublishToEmqxAsync(topicPrefix, op string, seqNo int, data interface{}) <-chan error {
@@ -264,8 +265,9 @@ func (client *Client) PublishToEmqxAsync(topicPrefix, op string, seqNo int, data
 }
 
 //ResponseToEmqx 用于回复云端的场景
-func (client *Client) ResponseToEmqx(topicPrefix, op string, seqNo int, data interface{}) {
-	client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn, strconv.Itoa(seqNo)), op, seqNo, data)
+func (client *Client) ResponseToEmqx(topicPrefix, op string, seqNo int, data interface{}) tools.Error {
+	err := client.sendToBroker(tools.JoinMqttTopic(topicPrefix, client.config.GwType, client.config.GwSn, strconv.Itoa(seqNo)), op, seqNo, data)
+	return tools.NewSdkError(tools.PubEmqxErrorCode, tools.PubEmqxErrorMessage, err)
 }
 
 func (client *Client) ResponseToEmqxAsync(topicPrefix, op string, seqNo int, data interface{}) <-chan error {
@@ -280,15 +282,16 @@ func (client *Client) ResponseToEmqxAsync(topicPrefix, op string, seqNo int, dat
 	return errChan
 }
 
-func (client *Client) sendToBroker(topic string, op string, seqNo int, data interface{}) {
+func (client *Client) sendToBroker(topic string, op string, seqNo int, data interface{}) (originalErr error) {
 	p, _ := json.Marshal(data)
 	client.LC.Infof("topic: %s ,op: %s ,seqNo: %d ,payload before base64: %s", topic, op, seqNo, p)
 	mqttPayload := entities.CloudMqttBasicPayload{Op: op, SeqNo: seqNo, Payload: base64.StdEncoding.EncodeToString(p)}
 	p, _ = json.Marshal(mqttPayload)
 
 	token := client.client.Publish(topic, client.config.Qos, false, p)
-	if token.Error() != nil {
+	if token.WaitTimeout(5*time.Second) && token.Error() != nil {
 		client.LC.Errorf("publish topic:%s message error:%v, payload:%s", topic, token.Error(), string(p))
+		originalErr = token.Error()
 		// 判断错误，是否重新初始化 MQTT clients
 		if token.Error() == mqtt.ErrNotConnected && client.isActive.Load().(bool) {
 			if err := client.newMqttClient(); err != nil {
@@ -296,5 +299,5 @@ func (client *Client) sendToBroker(topic string, op string, seqNo int, data inte
 			}
 		}
 	}
-
+	return
 }
