@@ -20,22 +20,24 @@ client, err := services.NewClientWithOptions(config)
 
 ## 客户端配置
 
-| 属性 | 描述 |默认 |
-| -------- | -------------- | -------- |
-| GwType  | 网关类型   | 无默认，必需指定 |
-| GwSn   | 网关SN | 无默认，必需指定 |
-| Key    | 注册密钥   | 无默认，必需指定 |
-| ProductKey    | 产品密钥   | 无默认|
-| ServerUri    | emqx地址   | 无默认，必需指定 |
-| ClientId    | 客户端ID   | 无默认，必需指定 |
-| Protocol    | 协议   | MQTT |
-| CaPemPath    | 根证书路径(需指定至文件名，仅MQTTS所需)   | ca.pem |
-| GoRoutinePoolSize    | 最大并发数   | 5 |
-| MaxTaskQueueSize    | 可缓存的最大任务数  | 1000 |
-| EnableAsync    | 是否开启异步  | 不开启 |
-| Qos    | Qos等级  | 0 |
-| Username    | 用户名  | 默认为空 |
-| Password    | 密码  | 默认为空 |
-| LogLevel    | 日志级别  | INFO |
-| KeepAlive    | 心跳间隔  | 60秒 |
-| Timeout    | 超时时间  | 无默认 |
+| 属性 | 描述                      |默认 |
+| -------- |-------------------------| -------- |
+| GwType  | 网关类型                    | 无默认，必需指定 |
+| GwSn   | 网关SN                    | 无默认，必需指定 |
+| Key    | 注册密钥                    | 无默认，必需指定 |
+| ProductKey    | 产品密钥                    | 无默认|
+| ServerUri    | emqx地址                  | 无默认，必需指定 |
+| ClientId    | 客户端ID                   | 无默认，必需指定 |
+| Protocol    | 协议                      | MQTT |
+| CaPemPath    | 根证书路径(需指定至文件名，仅MQTTS所需) | ca.pem |
+| GoRoutinePoolSize    | 最大并发数                   | 5 |
+| MaxTaskQueueSize    | 可缓存的最大任务数               | 1000 |
+| EnableAsync    | 是否开启异步                  | 不开启 |
+| Qos    | Qos等级                   | 0 |
+| Username    | 用户名                     | 默认为空 |
+| Password    | 密码                      | 默认为空 |
+| LogLevel    | 日志级别                    | INFO |
+| KeepAlive    | 心跳间隔                    | 60秒 |
+| Timeout    | 超时时间                    | 无默认 |
+| CallbackOnGet    | 收到云端Get请求报文时的默认处理函数     | 无默认 |
+| CallbackOnSet    | 收到云端Set命令报文时的默认处理函数     | 无默认 |

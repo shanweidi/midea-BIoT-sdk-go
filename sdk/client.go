@@ -120,6 +120,20 @@ func (client *Client) IsConnected() bool {
 	return client.client.IsConnected()
 }
 
+func (client *Client) CallbackOnGet() func(payload entities.CloudMqttBasicPayload) {
+	client.rw.RLock()
+	defer client.rw.RUnlock()
+
+	return client.config.CallbackOnGet
+}
+
+func (client *Client) CallbackOnSet() func(payload entities.CloudMqttBasicPayload) {
+	client.rw.RLock()
+	defer client.rw.RUnlock()
+
+	return client.config.CallbackOnSet
+}
+
 // registerResponseHandler 注册相应处理函数
 func (client *Client) registerResponseHandler() mqtt.MessageHandler {
 	return func(c mqtt.Client, message mqtt.Message) {
@@ -160,10 +174,47 @@ func (client *Client) subscribeRegisterResponse(c mqtt.Client, topic string) {
 	}
 }
 
+func (client *Client) subscribe(c mqtt.Client, topic string, callback func(payload entities.CloudMqttBasicPayload)) {
+	if token := c.Subscribe(topic, client.config.Qos,
+		func(c mqtt.Client, message mqtt.Message) {
+			mqttPayload := entities.CloudMqttBasicPayload{}
+			err := json.Unmarshal(message.Payload(), &mqttPayload)
+			if err != nil {
+				client.LC.Errorf("decode mqtt payload: %s error, msg: %s", message.Payload(), err)
+				return
+			}
+			//payload base64解码
+			bytes, err := base64.StdEncoding.DecodeString(mqttPayload.Payload)
+			if err != nil {
+				client.LC.Errorf("invalid payload:%s", mqttPayload.Payload)
+				return
+			}
+			mqttPayload.Payload = string(bytes)
+			client.LC.Infof("topic:%s receive  payload: %s", topic, tools.ToJson(mqttPayload))
+
+			if client.isOpenAsync {
+				client.AddAsyncTask(func() {
+					callback(mqttPayload)
+				})
+			} else {
+				callback(mqttPayload)
+			}
+		}); token.Wait() && token.Error() != nil {
+		client.LC.Errorf("could not subscribe to topic '%s' for MQTT trigger: %s",
+			topic, token.Error().Error())
+	}
+}
+
 //建立起连接后，网关先发送注册报文至云端，注册成功后再执行后续逻辑
 func (client *Client) defaultOnConnectHandler() mqtt.OnConnectHandler {
 	return func(c mqtt.Client) {
 		client.subscribeRegisterResponse(c, tools.JoinMqttTopic(SUBSCRIBE_TOPIC_DEV_REG_RES, client.config.GwType, client.config.GwSn))
+		if client.config.CallbackOnGet != nil {
+			client.subscribe(c, tools.JoinMqttTopic(SUBSCRIBE_TOPIC_DEV_GET, client.config.GwType, client.config.GwSn), client.config.CallbackOnGet)
+		}
+		if client.config.CallbackOnSet != nil {
+			client.subscribe(c, tools.JoinMqttTopic(SUBSCRIBE_TOPIC_DEV_SET, client.config.GwType, client.config.GwSn), client.config.CallbackOnSet)
+		}
 
 		//发送网关注册报文
 		devRegPayload := entities.DevReg{
@@ -199,7 +250,7 @@ func (client *Client) newMqttClient() tools.Error {
 	opts.SetKeepAlive(client.config.KeepAlive)
 	opts.SetPassword(client.config.Password)
 	opts.SetUsername(client.config.Username)
-	opts.SetAutoReconnect(true)
+	opts.SetAutoReconnect(false)
 	opts.SetOnConnectHandler(client.defaultOnConnectHandler())
 
 	if client.config.Protocol == MQTTS {

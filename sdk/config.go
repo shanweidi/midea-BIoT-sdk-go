@@ -6,6 +6,7 @@
 package sdk
 
 import (
+	"github.com/shanweidi/midea-BIoT-sdk-go/sdk/entities"
 	"time"
 
 	"github.com/shanweidi/midea-BIoT-sdk-go/tools"
@@ -29,6 +30,8 @@ type Config struct {
 	LogLevel          string   `default:"INFO"`
 	Timeout           time.Duration
 	KeepAlive         time.Duration `default:"60"`
+	CallbackOnGet     func(payload entities.CloudMqttBasicPayload)
+	CallbackOnSet     func(payload entities.CloudMqttBasicPayload)
 }
 
 func NewConfig() (config *Config) {
@@ -141,5 +144,15 @@ func (c *Config) WithUsername(username string) *Config {
 
 func (c *Config) WithPassword(password string) *Config {
 	c.Password = password
+	return c
+}
+
+func (c *Config) WithGetCallback(callback func(payload entities.CloudMqttBasicPayload)) *Config {
+	c.CallbackOnGet = callback
+	return c
+}
+
+func (c *Config) WithSetCallback(callback func(payload entities.CloudMqttBasicPayload)) *Config {
+	c.CallbackOnSet = callback
 	return c
 }

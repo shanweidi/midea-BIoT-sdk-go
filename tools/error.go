@@ -42,6 +42,10 @@ const (
 
 	ConfigProtocolErrorCode    = "SDK.ProtocolNotSupport"
 	ConfigProtocolErrorMessage = "The Protocol  is not supported yet!Sorry, please focus on our upgrade"
+
+	CallbackOnGetErrorCode = "SDK.GetCallbackNil"
+	CallbackOnSetErrorCode = "SDK.SetCallbackNil"
+	CallbackErrorMessage   = "This Callback Func is not config yet!Sorry, please check your config"
 )
 
 type Error interface {
